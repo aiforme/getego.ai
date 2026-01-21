@@ -239,11 +239,24 @@
                     <span class="text-ego-white">The first intelligence that answers only to you.</span>
                 </p>
                 
-                <!-- CTA Form -->
-                <form id="hero-form" class="flex flex-col sm:flex-row gap-4 max-w-lg fade-in delay-300" data-netlify="true">
+                <!-- CTA Form (Netlify) -->
+                <form 
+                    id="hero-form" 
+                    name="hero-waitlist" 
+                    method="POST" 
+                    data-netlify="true" 
+                    data-netlify-honeypot="bot-field"
+                    class="flex flex-col sm:flex-row gap-4 max-w-lg fade-in delay-300"
+                >
+                    <!-- Netlify hidden fields -->
+                    <input type="hidden" name="form-name" value="hero-waitlist">
+                    <p class="hidden">
+                        <label>Don't fill this out: <input name="bot-field"></label>
+                    </p>
                     <input 
                         type="email" 
                         id="hero-email"
+                        name="email"
                         placeholder="Enter your email"
                         required
                         class="flex-1 bg-ego-gray border border-ego-white/20 px-5 py-4 text-ego-white placeholder-ego-white/40 font-mono text-sm focus:outline-none focus:border-ego-green transition-colors duration-300"
@@ -559,11 +572,24 @@
                 <h2 class="text-3xl md:text-5xl font-bold mb-6">Join the Resistance.</h2>
                 <p class="text-ego-white/60 text-lg mb-10">Be first in line when Ego ships. No spam. Only updates.</p>
                 
-                <!-- CTA Form -->
-                <form id="footer-form" class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto mb-8" data-netlify="true">
+                <!-- CTA Form (Netlify) -->
+                <form 
+                    id="footer-form" 
+                    name="footer-waitlist" 
+                    method="POST" 
+                    data-netlify="true" 
+                    data-netlify-honeypot="bot-field"
+                    class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto mb-8"
+                >
+                    <!-- Netlify hidden fields -->
+                    <input type="hidden" name="form-name" value="footer-waitlist">
+                    <p class="hidden">
+                        <label>Don't fill this out: <input name="bot-field"></label>
+                    </p>
                     <input 
                         type="email" 
                         id="footer-email"
+                        name="email"
                         placeholder="your@email.com"
                         required
                         class="flex-1 bg-ego-gray border border-ego-white/20 px-5 py-4 text-ego-white placeholder-ego-white/40 font-mono text-sm focus:outline-none focus:border-ego-green transition-colors duration-300 text-center sm:text-left"
@@ -722,22 +748,66 @@
     
     <!-- JavaScript for Form Handling and Modals -->
     <script>
+        // ========== NETLIFY FORM SUBMISSION ==========
+        
+        // Helper function to submit form via AJAX to Netlify
+        async function submitToNetlify(form, email) {
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(formData).toString()
+                });
+                
+                if (response.ok) {
+                    console.log('🟢 EGO ACCESS REQUESTED:', email);
+                    alert('Access requested for: ' + email + '\n\nYou will be notified when Ego is ready.');
+                    form.reset();
+                    return true;
+                } else {
+                    throw new Error('Form submission failed');
+                }
+            } catch (error) {
+                console.error('❌ Form submission error:', error);
+                alert('Submission failed. Please try again or contact us directly at founder@getego.ai');
+                return false;
+            }
+        }
+        
         // Hero Form Handler
-        document.getElementById('hero-form').addEventListener('submit', function(e) {
+        document.getElementById('hero-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('hero-email').value;
-            console.log('🟢 EGO ACCESS REQUESTED:', email);
-            alert('Access requested for: ' + email + '\n\nYou will be notified when Ego is ready.');
-            this.reset();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            // Disable button during submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'SUBMITTING...';
+            
+            await submitToNetlify(this, email);
+            
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'CLAIM YOUR UNIT →';
         });
         
         // Footer Form Handler
-        document.getElementById('footer-form').addEventListener('submit', function(e) {
+        document.getElementById('footer-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('footer-email').value;
-            console.log('🟢 EGO ACCESS REQUESTED:', email);
-            alert('Access requested for: ' + email + '\n\nYou will be notified when Ego is ready.');
-            this.reset();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            // Disable button during submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'SUBMITTING...';
+            
+            await submitToNetlify(this, email);
+            
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'REQUEST ACCESS →';
         });
         
         // Smooth scroll for anchor links
